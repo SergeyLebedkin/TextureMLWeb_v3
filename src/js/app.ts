@@ -1,4 +1,4 @@
-import { CoreLogs } from "./TextureML/Types/DataLogs";
+import { CoreLogs } from "./TextureML/Types/CoreLogs";
 
 // TextureMLApp
 export class TextureMLApp {
@@ -26,7 +26,7 @@ export class TextureMLApp {
     private inputLoadCoreLogs: HTMLInputElement = null;
     private inputLoadCoreImages: HTMLInputElement = null;
     private inputColorMapJet: HTMLInputElement = null;
-    // data
+    // data structures
     private coreLogs: CoreLogs = null;
 
     // constructor
@@ -58,9 +58,20 @@ export class TextureMLApp {
 
         // setup events
         this.buttonLoadCoreLogs.onclick = this.buttonLoadCoreLogsOnClick.bind(this);
+        this.buttonLoadCoreImages.onclick = this.buttonLoadCoreImagesOnClick.bind(this);
 
-        // data
+        // data structures
         this.coreLogs = new CoreLogs();
+    }
+
+    // buttonLoadCoreImagesOnClick
+    private buttonLoadCoreImagesOnClick(event: MouseEvent) {
+        this.inputLoadCoreImages.accept = ".png";
+        this.inputLoadCoreImages.onchange = event => {
+            let files: Array<File> = event.currentTarget["files"];
+            if (files.length === 0) return;
+        }
+        this.inputLoadCoreImages.click();
     }
 
     // buttonLoadCoreLogsOnClick

@@ -10,6 +10,15 @@ export class CoreLogs {
     // events
     public onloadFileData: (this: CoreLogs, dataLogs: CoreLogs) => any = null;
 
+    // clear
+    public clear(): void {
+        // clear data
+        this.depth = [];
+        this.density = [];
+        this.PE = [];
+        this.zeff = [];
+    }
+
     // loadFromFile
     public loadFromFile(file: File): void {
         // check for null
@@ -25,10 +34,12 @@ export class CoreLogs {
         fileReader.readAsText(this.fileRef);
     }
 
-    // loadFromFile
+    // loadFromCSV
     public loadFromCSV(csv: string): void {
+        // clear
+        this.clear();
         // get strings list
-        let strings: Array<string> = csv.split('\r\n');
+        let strings = csv.split('\r\n');
         // parse lines
         for (let i = 1; i < strings.length; i++) {
             let values = strings[i].split(",");
