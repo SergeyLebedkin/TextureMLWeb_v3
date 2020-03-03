@@ -1,3 +1,5 @@
+import { CoreLogs } from "./TextureML/Types/DataLogs";
+
 // TextureMLApp
 export class TextureMLApp {
     // elements - top panel
@@ -21,8 +23,11 @@ export class TextureMLApp {
     private buttonTextureMLInference: HTMLButtonElement = null;
     // elements - general
     private divOverlay: HTMLDivElement = null;
+    private inputLoadCoreLogs: HTMLInputElement = null;
     private inputLoadCoreImages: HTMLInputElement = null;
     private inputColorMapJet: HTMLInputElement = null;
+    // data
+    private coreLogs: CoreLogs = null;
 
     // constructor
     constructor() {
@@ -47,7 +52,25 @@ export class TextureMLApp {
         this.buttonTextureMLInference = document.getElementById("buttonTextureMLInference") as HTMLButtonElement;
         // get elements - general
         this.divOverlay = document.getElementById("divOverlay") as HTMLDivElement;
+        this.inputLoadCoreLogs = document.getElementById("inputLoadCoreLogs") as HTMLInputElement;
         this.inputLoadCoreImages = document.getElementById("inputLoadCoreImages") as HTMLInputElement;
         this.inputColorMapJet = document.getElementById("inputColorMapJet") as HTMLInputElement;
+
+        // setup events
+        this.buttonLoadCoreLogs.onclick = this.buttonLoadCoreLogsOnClick.bind(this);
+
+        // data
+        this.coreLogs = new CoreLogs();
+    }
+
+    // buttonLoadCoreLogsOnClick
+    private buttonLoadCoreLogsOnClick(event: MouseEvent) {
+        this.inputLoadCoreLogs.accept = ".csv";
+        this.inputLoadCoreLogs.onchange = event => {
+            let files: Array<File> = event.currentTarget["files"];
+            if (files.length !== 1) return;
+            this.coreLogs.loadFromFile(files[0]);
+        }
+        this.inputLoadCoreLogs.click();
     }
 }
