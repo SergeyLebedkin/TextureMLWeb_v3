@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TextureMLWeb v3</title>
+    <link rel="stylesheet" type="text/css" href="static/css/index.css">
+    <!-- PLEASE, REMOVE THIS COMMENT BEFORE YOU UPLOAD TO THE BACKEND
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/index.css') }}">
+    -->
+</head>
+
+<body>
+    <div class="main-panel">
+        <div class="top-panel">
+            <div style="text-align: left; width: 50%">
+                <div style="padding:8px;">
+                    <button class="panel-button" id="buttonLoadCoreLogs">Load Core Logs</button>
+                    <button class="panel-button" id="buttonLoadCoreImages">Load Core Images</button>
+                </div>
+            </div>
+            <div style="text-align: right; width: 50%">
+                <div style="padding:8px;">
+                    <button class="panel-button" id="buttonSubmitTextures">Submit Textures</button>
+                </div>
+            </div>
+        </div>
+        <div class="center-panel">
+            <div class="left-panel">
+                <div class="content-panel" id="divCore">
+                    <div class="controls-panel">
+                    </div>
+                    <div class="image-preview-panel" id="divCorePreview">
+                    </div>
+                </div>
+                <div class="content-panel" id="divCrops">
+                    <div class="controls-panel">
+                    </div>
+                    <div class="image-preview-panel" id="divCropsPreview">
+                    </div>
+                </div>
+                <div class="content-panel" id="divReprs">
+                    <div class="controls-panel">
+                    </div>
+                    <div class="image-preview-panel" id="divReprsPreview">
+                    </div>
+                </div>
+            </div>
+            <div class="right-panel">
+                <div class="content-panel">
+                    <div class="right-controls-panel">
+                        <div class="texture-ids-panel">
+                            <div class="texture-ids-columns" id="divTextureIDsPreview">
+                                <div class="texture-id-column">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="add-button-panel" id="buttonTextuteIDAdd">
+                            <button class="texture-ids-add-button">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bottom-panel">
+            <div style="text-align: left; width: 50%">
+                <div style="padding:2px 5px;">
+                    <button class="panel-button-current" id="buttonCore">Core</button>
+                    <button class="panel-button" id="buttonCrops">Crops</button>
+                    <button class="panel-button" id="buttonRepresentativeCrops">Representative Crops</button>
+                    <button class="panel-button" id="buttonTextureMLInference">TextureML Inference</button>
+                </div>
+            </div>
+            <div style="text-align: right; width: 50%">
+                <div style="padding:10px 10px;">
+                    <label style="width: 90px">Color Scale JET:</label>
+                    <input type="checkbox" id="inputColorMapJet">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divOverlay" class="overlay"></div>
+    <input type="file" id="inputLoadCoreImages" multiple name="files[]" style="display:none">
+    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.chunks.index.entry %>"></script>
+    <!-- PLEASE, REMOVE THIS COMMENT BEFORE YOU UPLOAD TO THE BACKEND
+    <script type="text/javascript" src="{{ url_for('static', filename = 'js/index.js') }}"></script>
+    -->
+</body>
+
+</html>
