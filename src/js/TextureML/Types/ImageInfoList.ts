@@ -23,6 +23,8 @@ export class ImageInfoList {
 
     // saveToJson
     public saveToJson(parent: any) {
+        for (let imageInfo of this.imageInfos)
+            parent[imageInfo.name] = imageInfo.canvasImage.toDataURL().replace("data:image/png;base64,", "");
     }
 
     // loadFromJson

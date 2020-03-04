@@ -50,4 +50,12 @@ export class CoreLogs {
             }
         }
     }
+
+     // saveToJson
+    public saveToJson(parent: any): void {
+        parent["depth"] = this.depth;
+        parent["density"] = this.density;
+        parent["PE"] = this.PE;
+        parent["zeff"] = this.zeff;
+    }
 }

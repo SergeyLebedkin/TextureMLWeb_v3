@@ -10,12 +10,4 @@ export class SessionData {
     public cropImageList: ImageInfoList = new ImageInfoList();
     public reprImageNames: Array<string> = [];
     public inferenceList: Array<Inference> = new Array<Inference>();
-
-    // saveToJson
-    public saveToJson(): any {
-    }
-
-    // loadFromJson
-    public loadFromJson(json: string): void {
-    }
 }

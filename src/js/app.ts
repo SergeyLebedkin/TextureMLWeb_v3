@@ -3,6 +3,7 @@ import { SessionData } from "./TextureML/Types/SessionData";
 import { OverlayLog } from "./TextureML/Components/OverlayLog";
 import { ImageInfoListViewer } from "./TextureML/Components/ImageInfoListViewer";
 import { ColorMapType } from "./TextureML/Types/ColorMapType";
+import { SessionInfo } from "./TextureML/Types/SessionInfo";
 
 // TextureMLApp
 export class TextureMLApp {
@@ -36,7 +37,7 @@ export class TextureMLApp {
     private imageInfoListCropViewer: ImageInfoListViewer = null;
     private imageInfoListReprViewer: ImageInfoListViewer = null;
     // data structures
-    private sessionData: SessionData = null;
+    private sessionInfo: SessionInfo = null;
 
     // constructor
     constructor() {
@@ -70,23 +71,24 @@ export class TextureMLApp {
         this.divRepr.style.display = "none";
 
         // setup events
+        this.buttonLoadCoreLogs.onclick = this.buttonLoadCoreLogsOnClick.bind(this);
+        this.buttonLoadCoreImages.onclick = this.buttonLoadCoreImagesOnClick.bind(this);
         this.buttonCore.onclick = this.buttonCoreOnClick.bind(this);
         this.buttonCrop.onclick = this.buttonCropOnClick.bind(this);
         this.buttonRepr.onclick = this.buttonReprOnClick.bind(this);
-        this.buttonLoadCoreLogs.onclick = this.buttonLoadCoreLogsOnClick.bind(this);
-        this.buttonLoadCoreImages.onclick = this.buttonLoadCoreImagesOnClick.bind(this);
+        this.buttonInfr.onclick = this.buttonInfrOnClick.bind(this);
         this.inputColorMapJet.onclick = this.inputColorMapJetOnClick.bind(this);
 
         // data structures
-        this.sessionData = new SessionData();
-        this.sessionData.coreImageList.onloadImageFile = imageInfo => console.log(imageInfo);
+        this.sessionInfo = new SessionInfo();
+        this.sessionInfo.sessionData.coreImageList.onloadImageFile = imageInfo => console.log(imageInfo);
 
         // components
         this.overlayLog = new OverlayLog(this.divOverlay);
-        this.imageInfoListCoreViewer = new ImageInfoListViewer(this.divCorePreview, this.sessionData.coreImageList);
-        this.imageInfoListCropViewer = new ImageInfoListViewer(this.divCropPreview, this.sessionData.cropImageList);
-        this.imageInfoListReprViewer = new ImageInfoListViewer(this.divReprPreview, this.sessionData.cropImageList);
-        this.imageInfoListReprViewer.setIncludeList(this.sessionData.reprImageNames);
+        this.imageInfoListCoreViewer = new ImageInfoListViewer(this.divCorePreview, this.sessionInfo.sessionData.coreImageList);
+        this.imageInfoListCropViewer = new ImageInfoListViewer(this.divCropPreview, this.sessionInfo.sessionData.cropImageList);
+        this.imageInfoListReprViewer = new ImageInfoListViewer(this.divReprPreview, this.sessionInfo.sessionData.cropImageList);
+        this.imageInfoListReprViewer.setIncludeList(this.sessionInfo.sessionData.reprImageNames);
     }
 
     // buttonLoadCoreLogsOnClick
@@ -98,7 +100,7 @@ export class TextureMLApp {
             let files: Array<File> = event.currentTarget["files"];
             if (files.length !== 1) return;
             // load from file
-            this.sessionData.coreLogs.loadFromFile(files[0]).then(coreLogs => console.log(coreLogs));
+            this.sessionInfo.sessionData.coreLogs.loadFromFile(files[0]).then(coreLogs => console.log(coreLogs));
         }
         this.inputLoadCoreLogs.click();
     }
@@ -114,8 +116,14 @@ export class TextureMLApp {
             // load from files
             this.overlayLog.show();
             this.overlayLog.addMessage("Loading images...");
-            this.sessionData.coreImageList.onloadImageFile = imageInfo => this.overlayLog.addMessage(imageInfo.name + " loaded...");
-            this.sessionData.coreImageList.loadFromFiles(files).then(images => { this.overlayLog.hide(); this.imageInfoListCoreViewer.update(); });
+            this.sessionInfo.sessionData.coreImageList.onloadImageFile = imageInfo => this.overlayLog.addMessage(imageInfo.name + " loaded...");
+            this.sessionInfo.sessionData.coreImageList.loadFromFiles(files).then(images => {
+                this.overlayLog.addMessage("Send... Waiting...");
+                this.sessionInfo.send().then(sessionInfo => {
+                    this.imageInfoListCoreViewer.update();
+                    this.overlayLog.hide();
+                });
+            });
         }
         this.inputLoadCoreImages.click();
     }
@@ -153,8 +161,8 @@ export class TextureMLApp {
         this.divRepr.style.display = "flex";
     }
 
-    // buttonTextureMLInferenceOnClick
-    private buttonTextureMLInferenceOnClick(event: MouseEvent) {
+    // buttonInfrOnClick
+    private buttonInfrOnClick(event: MouseEvent) {
     }
 
     // inputColorMapJetOnClick
