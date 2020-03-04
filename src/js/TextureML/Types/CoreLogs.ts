@@ -1,7 +1,5 @@
 // CoreLogs
 export class CoreLogs {
-    // file
-    public fileRef: File = null;
     // data
     public depth: Array<number> = [];
     public density: Array<number> = [];
@@ -23,15 +21,13 @@ export class CoreLogs {
     public loadFromFile(file: File): void {
         // check for null
         if (file === null) return;
-        // store name
-        this.fileRef = file;
         // read file
         var fileReader = new FileReader();
         fileReader.onload = event => {
             this.loadFromCSV(event.currentTarget["result"]);
             this.onloadFileData && this.onloadFileData(this);
         }
-        fileReader.readAsText(this.fileRef);
+        fileReader.readAsText(file);
     }
 
     // loadFromCSV

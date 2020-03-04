@@ -2,6 +2,6 @@
 export class TextureID {
     public name: string = "";
     public color: string = "#ff0000";
-    public texInfrncImageNames: Array<string> = [];
-    public texManualImageNames: Array<string> = [];
+    public infrncImageNames: Array<string> = [];
+    public manualImageNames: Array<string> = [];
 }

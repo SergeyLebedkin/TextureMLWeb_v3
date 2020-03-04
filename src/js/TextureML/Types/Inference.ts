@@ -1,6 +1,7 @@
 import { TextureID } from "./TextureID";
 
-// TextureIDList
-export class TextureIDList {
+// Inference (generation)
+export class Inference {
+    // data
     public textureIDList: Array<TextureID> = [];
 }

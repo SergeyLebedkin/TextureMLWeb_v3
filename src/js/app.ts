@@ -1,4 +1,5 @@
 import { CoreLogs } from "./TextureML/Types/CoreLogs";
+import { SessionData } from "./TextureML/Types/SessionData";
 
 // TextureMLApp
 export class TextureMLApp {
@@ -27,7 +28,7 @@ export class TextureMLApp {
     private inputLoadCoreImages: HTMLInputElement = null;
     private inputColorMapJet: HTMLInputElement = null;
     // data structures
-    private coreLogs: CoreLogs = null;
+    private sessionData: SessionData = null;
 
     // constructor
     constructor() {
@@ -61,27 +62,34 @@ export class TextureMLApp {
         this.buttonLoadCoreImages.onclick = this.buttonLoadCoreImagesOnClick.bind(this);
 
         // data structures
-        this.coreLogs = new CoreLogs();
-    }
-
-    // buttonLoadCoreImagesOnClick
-    private buttonLoadCoreImagesOnClick(event: MouseEvent) {
-        this.inputLoadCoreImages.accept = ".png";
-        this.inputLoadCoreImages.onchange = event => {
-            let files: Array<File> = event.currentTarget["files"];
-            if (files.length === 0) return;
-        }
-        this.inputLoadCoreImages.click();
+        this.sessionData = new SessionData();
     }
 
     // buttonLoadCoreLogsOnClick
     private buttonLoadCoreLogsOnClick(event: MouseEvent) {
+        // set files type
         this.inputLoadCoreLogs.accept = ".csv";
         this.inputLoadCoreLogs.onchange = event => {
+            // get selected files
             let files: Array<File> = event.currentTarget["files"];
             if (files.length !== 1) return;
-            this.coreLogs.loadFromFile(files[0]);
+            // load from file
+            this.sessionData.coreLogs.loadFromFile(files[0]);
         }
         this.inputLoadCoreLogs.click();
+    }
+
+    // buttonLoadCoreImagesOnClick
+    private buttonLoadCoreImagesOnClick(event: MouseEvent) {
+        // set files type
+        this.inputLoadCoreImages.accept = ".png";
+        this.inputLoadCoreImages.onchange = event => {
+            // get selected files
+            let files: Array<File> = event.currentTarget["files"];
+            if (files.length === 0) return;
+            // load from files
+            this.sessionData.coreImageList.loadFromFiles(files);
+        }
+        this.inputLoadCoreImages.click();
     }
 }
