@@ -10,8 +10,7 @@ export class ImageInfoListViewer {
     // scale
     public scale: number = 1.0;
     public dragable: boolean = false;
-    private dropable: boolean = false;
-    public represent: boolean = false;
+    private includeList: Array<string> = null;
     // color map type
     private colorMapType: ColorMapType = ColorMapType.GRAY_SCALE;
     // events
@@ -22,17 +21,20 @@ export class ImageInfoListViewer {
         // set fields
         this.parent = parent;
         this.imageInfoList = imageInfoList;
-        // scale
-        this.scale = 1.0;
-        this.represent = false;
-        // color map type
-        this.colorMapType = ColorMapType.GRAY_SCALE;
         this.update();
+    }
+
+    // setIncludeList
+    public setIncludeList(includeList: Array<string>) {
+        if (this.includeList !== includeList) {
+            this.includeList = includeList;
+            this.update();
+        }
     }
 
     // setColorMapType
     // NOTE: This is async function
-    setColorMapType(colorMapType: ColorMapType) {
+    public setColorMapType(colorMapType: ColorMapType) {
         if (this.colorMapType !== colorMapType) {
             this.colorMapType = colorMapType;
             this.update();
@@ -54,8 +56,12 @@ export class ImageInfoListViewer {
             this.parent.removeChild(this.parent.firstChild);
 
         // add all images to preview
-        for (let imageInfo of this.imageInfoList.imageInfos)
-            this.appendImageItem(imageInfo);
+        for (let imageInfo of this.imageInfoList.imageInfos) {
+            if (this.includeList) {
+                if (this.includeList.indexOf(imageInfo.name) >= 0)
+                    this.appendImageItem(imageInfo);
+            } else this.appendImageItem(imageInfo);
+        }
     }
 
     // appendImageItem

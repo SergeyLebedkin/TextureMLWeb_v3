@@ -86,6 +86,7 @@ export class TextureMLApp {
         this.imageInfoListCoreViewer = new ImageInfoListViewer(this.divCorePreview, this.sessionData.coreImageList);
         this.imageInfoListCropViewer = new ImageInfoListViewer(this.divCropPreview, this.sessionData.cropImageList);
         this.imageInfoListReprViewer = new ImageInfoListViewer(this.divReprPreview, this.sessionData.cropImageList);
+        this.imageInfoListReprViewer.setIncludeList(this.sessionData.reprImageNames);
     }
 
     // buttonLoadCoreLogsOnClick
@@ -160,7 +161,7 @@ export class TextureMLApp {
     private inputColorMapJetOnClick(event: MouseEvent) {
         let colorMapType: ColorMapType = event.currentTarget["checked"] ? ColorMapType.JET : ColorMapType.GRAY_SCALE;
         this.imageInfoListCoreViewer.setColorMapType(colorMapType);
-        this.imageInfoListReprViewer.setColorMapType(colorMapType);
+        this.imageInfoListCropViewer.setColorMapType(colorMapType);
         this.imageInfoListReprViewer.setColorMapType(colorMapType);
     }
 }
