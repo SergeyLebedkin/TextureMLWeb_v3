@@ -1,3 +1,5 @@
+import { resolve } from "dns";
+
 // CoreLogs
 export class CoreLogs {
     // data
@@ -5,8 +7,6 @@ export class CoreLogs {
     public density: Array<number> = [];
     public PE: Array<number> = [];
     public zeff: Array<number> = [];
-    // events
-    public onloadFileData: (this: CoreLogs, dataLogs: CoreLogs) => any = null;
 
     // clear
     public clear(): void {
@@ -18,16 +18,18 @@ export class CoreLogs {
     }
 
     // loadFromFile
-    public loadFromFile(file: File): void {
-        // check for null
-        if (file === null) return;
-        // read file
-        var fileReader = new FileReader();
-        fileReader.onload = event => {
-            this.loadFromCSV(event.currentTarget["result"]);
-            this.onloadFileData && this.onloadFileData(this);
-        }
-        fileReader.readAsText(file);
+    public loadFromFile(file: File): Promise<CoreLogs> {
+        return new Promise<CoreLogs>(resolve => {
+            // check for null
+            if (file === null) return;
+            // read file
+            var fileReader = new FileReader();
+            fileReader.onload = event => {
+                this.loadFromCSV(event.currentTarget["result"]);
+                resolve(this);
+            }
+            fileReader.readAsText(file);
+        });
     }
 
     // loadFromCSV

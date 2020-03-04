@@ -1,5 +1,8 @@
 import { CoreLogs } from "./TextureML/Types/CoreLogs";
 import { SessionData } from "./TextureML/Types/SessionData";
+import { OverlayLog } from "./TextureML/Components/OverlayLog";
+import { ImageInfoListViewer } from "./TextureML/Components/ImageInfoListViewer";
+import { ColorMapType } from "./TextureML/Types/ColorMapType";
 
 // TextureMLApp
 export class TextureMLApp {
@@ -10,23 +13,28 @@ export class TextureMLApp {
     // elements - left panel
     private divCore: HTMLDivElement = null;
     private divCorePreview: HTMLDivElement = null;
-    private divCrops: HTMLDivElement = null;
-    private divCropsPreview: HTMLDivElement = null;
-    private divReprs: HTMLDivElement = null;
-    private divReprsPreview: HTMLDivElement = null;
+    private divCrop: HTMLDivElement = null;
+    private divCropPreview: HTMLDivElement = null;
+    private divRepr: HTMLDivElement = null;
+    private divReprPreview: HTMLDivElement = null;
     // elements - right panel
     private divTextureIDsPreview: HTMLDivElement = null;
     private buttonTextuteIDAdd: HTMLButtonElement = null;
     // elements - bottom panel
     private buttonCore: HTMLButtonElement = null;
-    private buttonCrops: HTMLButtonElement = null;
-    private buttonRepresentativeCrops: HTMLButtonElement = null;
-    private buttonTextureMLInference: HTMLButtonElement = null;
+    private buttonCrop: HTMLButtonElement = null;
+    private buttonRepr: HTMLButtonElement = null;
+    private buttonInfr: HTMLButtonElement = null;
     // elements - general
     private divOverlay: HTMLDivElement = null;
     private inputLoadCoreLogs: HTMLInputElement = null;
     private inputLoadCoreImages: HTMLInputElement = null;
     private inputColorMapJet: HTMLInputElement = null;
+    // components
+    private overlayLog: OverlayLog = null;
+    private imageInfoListCoreViewer: ImageInfoListViewer = null;
+    private imageInfoListCropViewer: ImageInfoListViewer = null;
+    private imageInfoListReprViewer: ImageInfoListViewer = null;
     // data structures
     private sessionData: SessionData = null;
 
@@ -39,30 +47,45 @@ export class TextureMLApp {
         // get elements - left panel
         this.divCore = document.getElementById("divCore") as HTMLDivElement;
         this.divCorePreview = document.getElementById("divCorePreview") as HTMLDivElement;
-        this.divCrops = document.getElementById("divCrops") as HTMLDivElement;
-        this.divCropsPreview = document.getElementById("divCropsPreview") as HTMLDivElement;
-        this.divReprs = document.getElementById("divReprs") as HTMLDivElement;
-        this.divReprsPreview = document.getElementById("divReprsPreview") as HTMLDivElement;
+        this.divCrop = document.getElementById("divCrop") as HTMLDivElement;
+        this.divCropPreview = document.getElementById("divCropPreview") as HTMLDivElement;
+        this.divRepr = document.getElementById("divRepr") as HTMLDivElement;
+        this.divReprPreview = document.getElementById("divReprPreview") as HTMLDivElement;
         // get elements - right panel
         this.divTextureIDsPreview = document.getElementById("divTextureIDsPreview") as HTMLDivElement;
         this.buttonTextuteIDAdd = document.getElementById("buttonTextuteIDAdd") as HTMLButtonElement;
         // get elements - bottom panel
         this.buttonCore = document.getElementById("buttonCore") as HTMLButtonElement;
-        this.buttonCrops = document.getElementById("buttonCrops") as HTMLButtonElement;
-        this.buttonRepresentativeCrops = document.getElementById("buttonRepresentativeCrops") as HTMLButtonElement;
-        this.buttonTextureMLInference = document.getElementById("buttonTextureMLInference") as HTMLButtonElement;
+        this.buttonCrop = document.getElementById("buttonCrop") as HTMLButtonElement;
+        this.buttonRepr = document.getElementById("buttonRepr") as HTMLButtonElement;
+        this.buttonInfr = document.getElementById("buttonInfr") as HTMLButtonElement;
         // get elements - general
         this.divOverlay = document.getElementById("divOverlay") as HTMLDivElement;
         this.inputLoadCoreLogs = document.getElementById("inputLoadCoreLogs") as HTMLInputElement;
         this.inputLoadCoreImages = document.getElementById("inputLoadCoreImages") as HTMLInputElement;
         this.inputColorMapJet = document.getElementById("inputColorMapJet") as HTMLInputElement;
 
+        // setup base params
+        this.divCrop.style.display = "none";
+        this.divRepr.style.display = "none";
+
         // setup events
+        this.buttonCore.onclick = this.buttonCoreOnClick.bind(this);
+        this.buttonCrop.onclick = this.buttonCropOnClick.bind(this);
+        this.buttonRepr.onclick = this.buttonReprOnClick.bind(this);
         this.buttonLoadCoreLogs.onclick = this.buttonLoadCoreLogsOnClick.bind(this);
         this.buttonLoadCoreImages.onclick = this.buttonLoadCoreImagesOnClick.bind(this);
+        this.inputColorMapJet.onclick = this.inputColorMapJetOnClick.bind(this);
 
         // data structures
         this.sessionData = new SessionData();
+        this.sessionData.coreImageList.onloadImageFile = imageInfo => console.log(imageInfo);
+
+        // components
+        this.overlayLog = new OverlayLog(this.divOverlay);
+        this.imageInfoListCoreViewer = new ImageInfoListViewer(this.divCorePreview, this.sessionData.coreImageList);
+        this.imageInfoListCropViewer = new ImageInfoListViewer(this.divCropPreview, this.sessionData.cropImageList);
+        this.imageInfoListReprViewer = new ImageInfoListViewer(this.divReprPreview, this.sessionData.cropImageList);
     }
 
     // buttonLoadCoreLogsOnClick
@@ -74,7 +97,7 @@ export class TextureMLApp {
             let files: Array<File> = event.currentTarget["files"];
             if (files.length !== 1) return;
             // load from file
-            this.sessionData.coreLogs.loadFromFile(files[0]);
+            this.sessionData.coreLogs.loadFromFile(files[0]).then(coreLogs => console.log(coreLogs));
         }
         this.inputLoadCoreLogs.click();
     }
@@ -88,8 +111,56 @@ export class TextureMLApp {
             let files: Array<File> = event.currentTarget["files"];
             if (files.length === 0) return;
             // load from files
-            this.sessionData.coreImageList.loadFromFiles(files);
+            this.overlayLog.show();
+            this.overlayLog.addMessage("Loading images...");
+            this.sessionData.coreImageList.onloadImageFile = imageInfo => this.overlayLog.addMessage(imageInfo.name + " loaded...");
+            this.sessionData.coreImageList.loadFromFiles(files).then(images => { this.overlayLog.hide(); this.imageInfoListCoreViewer.update(); });
         }
         this.inputLoadCoreImages.click();
+    }
+
+    // buttonCoreOnClick
+    private buttonCoreOnClick(event: MouseEvent) {
+        this.imageInfoListCoreViewer.update();
+        this.buttonCore.className = "panel-button-current";
+        this.buttonCrop.className = "panel-button";
+        this.buttonRepr.className = "panel-button";
+        this.divCore.style.display = "flex";
+        this.divCrop.style.display = "none";
+        this.divRepr.style.display = "none";
+    }
+
+    // buttonCropOnClick
+    private buttonCropOnClick(event: MouseEvent) {
+        this.imageInfoListCropViewer.update();
+        this.buttonCore.className = "panel-button";
+        this.buttonCrop.className = "panel-button-current";
+        this.buttonRepr.className = "panel-button";
+        this.divCore.style.display = "none";
+        this.divCrop.style.display = "flex"
+        this.divRepr.style.display = "none";
+    }
+
+    // buttonReprOnClick
+    private buttonReprOnClick(event: MouseEvent) {
+        this.imageInfoListReprViewer.update();
+        this.buttonCore.className = "panel-button";
+        this.buttonCrop.className = "panel-button";
+        this.buttonRepr.className = "panel-button-current";
+        this.divCore.style.display = "none";
+        this.divCrop.style.display = "none";
+        this.divRepr.style.display = "flex";
+    }
+
+    // buttonTextureMLInferenceOnClick
+    private buttonTextureMLInferenceOnClick(event: MouseEvent) {
+    }
+
+    // inputColorMapJetOnClick
+    private inputColorMapJetOnClick(event: MouseEvent) {
+        let colorMapType: ColorMapType = event.currentTarget["checked"] ? ColorMapType.JET : ColorMapType.GRAY_SCALE;
+        this.imageInfoListCoreViewer.setColorMapType(colorMapType);
+        this.imageInfoListReprViewer.setColorMapType(colorMapType);
+        this.imageInfoListReprViewer.setColorMapType(colorMapType);
     }
 }
