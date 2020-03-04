@@ -1,0 +1,3 @@
+// ImageInfo
+export class ImageInfo {
+}
