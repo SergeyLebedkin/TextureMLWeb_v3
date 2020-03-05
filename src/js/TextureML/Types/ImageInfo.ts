@@ -73,6 +73,31 @@ export class ImageInfo {
             fileReader.readAsDataURL(file);
         });
     }
+
+    // loadImageFromFile
+    public loadImageFromBase64(name: string, b64: string): void {
+        // store name
+        this.name = name;
+        this.minHeight = parseFloat(this.name.split('-')[0]);
+        this.maxHeight = parseFloat(this.name.split('-')[1]);
+        // create image from base64
+        let image = new Image();
+        // load image from file data
+        image.onload = event => {
+            // copy image to canvas
+            this.canvasImage.width = image.width;
+            this.canvasImage.height = image.height;
+            let canvasImageCtx = this.canvasImage.getContext("2d") as CanvasRenderingContext2D;
+            canvasImageCtx.drawImage(image, 0, 0);
+            // update image canvas jet
+            this.updateCanvasImageJet();
+            // call event
+            this.onloadImageBase64 && this.onloadImageBase64(this);
+        }
+        console.log(b64);
+        image.src = "data:image/png;base64," + b64;
+    }
+
 }
 
 // clamp, just clamp

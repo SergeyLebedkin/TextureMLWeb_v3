@@ -29,5 +29,11 @@ export class ImageInfoList {
 
     // loadFromJson
     public loadFromJson(json: any): void {
+        this.imageInfos = [];
+        for (let imageName of Object.keys(json)) {
+            let imageInfo = new ImageInfo();
+            imageInfo.loadImageFromBase64(imageName, json[imageName]);
+            this.imageInfos.push(imageInfo);
+        }
     }
 }

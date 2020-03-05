@@ -1,4 +1,6 @@
 import { SessionData } from "./SessionData";
+import { GenerationInfo } from "./GenerationInfo";
+import { TextureID } from "./TextureID";
 
 // POST_URL
 const POST_URL: string = "http://localhost:8087";
@@ -11,12 +13,31 @@ export class SessionInfo {
     // events
     public onload: (this: SessionInfo, sessionInfo: SessionInfo) => any = null;
 
+    // send
+    public send(): Promise<SessionInfo> {
+        return new Promise<SessionInfo>((resolve, reject) => {
+            // create http request
+            let url = POST_URL + "/texml_v3";
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onload = event => { this.loadFromJsonString(xhr.responseText); resolve(this); };
+            xhr.onerror = event => { reject(this); };
+            xhr.send(this.saveToJsonString());
+        })
+    }
+
     // saveToJsonString
     public saveToJsonString(): string {
         // generate request data
         let data = {
             session_id: this.sessionID,
-            core_logs: {},
+            core_logs: {
+                depth: this.sessionData.coreLogs.depth.slice(),
+                density: this.sessionData.coreLogs.density.slice(),
+                PE: this.sessionData.coreLogs.PE.slice(),
+                zeff: this.sessionData.coreLogs.zeff.slice(),
+            },
             core_images: {},
             crop_images: {},
             repr_images: this.sessionData.reprImageNames.slice(),
@@ -33,24 +54,39 @@ export class SessionInfo {
                 }
             })
         };
-        // safe images
-        this.sessionData.coreLogs.saveToJson(data.core_logs);
         this.sessionData.coreImageList.saveToJson(data.core_images);
         this.sessionData.cropImageList.saveToJson(data.crop_images);
         return JSON.stringify(data);
     }
 
-    // send
-    public send(): Promise<SessionInfo> {
-        return new Promise<SessionInfo>((resolve, reject) => {
-            // create http request
-            let url = POST_URL + "/texml_v3";
-            let xhr = new XMLHttpRequest();
-            xhr.open("POST", url, true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.onreadystatechange = event => { if (xhr.readyState === 4 && xhr.status === 200) resolve(this); };
-            xhr.onerror = event => reject(this);
-            xhr.send(this.saveToJsonString());
-        })
+    // loadFromJsonString
+    public loadFromJsonString(json: string) {
+        let data = JSON.parse(json);
+        this.sessionID = data.session_id;
+        // core logs
+        this.sessionData.coreLogs.depth = data.core_logs.depth.slice();
+        this.sessionData.coreLogs.density = data.core_logs.density.slice();
+        this.sessionData.coreLogs.PE = data.core_logs.PE.slice();
+        this.sessionData.coreLogs.zeff = data.core_logs.zeff.slice();
+        // load images
+        this.sessionData.coreImageList.loadFromJson(data.core_images);
+        this.sessionData.cropImageList.loadFromJson(data.crop_images);
+        // generation info
+        if (data.generations) {
+            this.sessionData.generationInfos = data.generations.map(generation => {
+                let generationInfo = new GenerationInfo();
+                if (generation.texure_ids) {
+                    generationInfo.textureIDList = generation.texure_ids.map(texture_id => {
+                        let textureID = new TextureID();
+                        textureID.name = texture_id.name;
+                        textureID.color = texture_id.color;
+                        textureID.manImageNames = texture_id.man_images.slice();
+                        textureID.infImageNames = texture_id.inf_images.slice();
+                        return textureID;
+                    })
+                }
+                return generationInfo;
+            })
+        }
     }
 }
