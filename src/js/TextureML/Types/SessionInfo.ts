@@ -12,6 +12,7 @@ export class SessionInfo {
     public sessionData: SessionData = new SessionData();
     // events
     public onload: (this: SessionInfo, sessionInfo: SessionInfo) => any = null;
+    public onloadFromServer: (this: SessionInfo, sessionInfo: SessionInfo) => any = null;
 
     // send
     public send(): Promise<SessionInfo> {
@@ -69,17 +70,16 @@ export class SessionInfo {
         this.sessionData.coreLogs.PE = data.core_logs.PE.slice();
         this.sessionData.coreLogs.zeff = data.core_logs.zeff.slice();
         // load images
-        this.sessionData.coreImageList.loadFromJson(data.core_images);
-        this.sessionData.cropImageList.loadFromJson(data.crop_images);
+        this.sessionData.coreImageList.loadFromJson(data.core_images).then(() => this.onloadFromServer && this.onloadFromServer(this));
+        this.sessionData.cropImageList.loadFromJson(data.crop_images).then(() => this.onloadFromServer && this.onloadFromServer(this));
+        this.sessionData.reprImageNames = data.repr_images.slice();
         // generation info
         if (data.generations) {
             this.sessionData.generationInfos = data.generations.map(generation => {
                 let generationInfo = new GenerationInfo();
                 if (generation.texure_ids) {
                     generationInfo.textureIDList = generation.texure_ids.map(texture_id => {
-                        let textureID = new TextureID();
-                        textureID.name = texture_id.name;
-                        textureID.color = texture_id.color;
+                        let textureID = new TextureID(texture_id.name, texture_id.color);
                         textureID.manImageNames = texture_id.man_images.slice();
                         textureID.infImageNames = texture_id.inf_images.slice();
                         return textureID;

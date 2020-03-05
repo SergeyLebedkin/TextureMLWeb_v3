@@ -28,12 +28,15 @@ export class ImageInfoList {
     }
 
     // loadFromJson
-    public loadFromJson(json: any): void {
+    public loadFromJson(json: any): Promise<ImageInfo[]> {
         this.imageInfos = [];
+        let promises = new Array<Promise<ImageInfo>>();
         for (let imageName of Object.keys(json)) {
             let imageInfo = new ImageInfo();
-            imageInfo.loadImageFromBase64(imageName, json[imageName]);
+            promises.push(imageInfo.loadImageFromBase64(imageName, json[imageName]));
             this.imageInfos.push(imageInfo);
         }
+        // wait for all files loaded
+        return Promise.all(promises);
     }
 }

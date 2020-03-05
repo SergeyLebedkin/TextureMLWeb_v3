@@ -13,6 +13,7 @@ export class TextureMLApp {
     private buttonLoadCoreLogs: HTMLButtonElement = null;
     private buttonLoadCoreImages: HTMLButtonElement = null;
     private buttonSubmitTextures: HTMLButtonElement = null;
+    private inputSessionID: HTMLInputElement = null;
     // elements - left panel
     private divCore: HTMLDivElement = null;
     private divCorePreview: HTMLDivElement = null;
@@ -47,6 +48,7 @@ export class TextureMLApp {
         this.buttonLoadCoreLogs = document.getElementById("buttonLoadCoreLogs") as HTMLButtonElement;
         this.buttonLoadCoreImages = document.getElementById("buttonLoadCoreImages") as HTMLButtonElement;
         this.buttonSubmitTextures = document.getElementById("buttonSubmitTextures") as HTMLButtonElement;
+        this.inputSessionID = document.getElementById("inputSessionID") as HTMLInputElement;
         // get elements - left panel
         this.divCore = document.getElementById("divCore") as HTMLDivElement;
         this.divCorePreview = document.getElementById("divCorePreview") as HTMLDivElement;
@@ -75,6 +77,7 @@ export class TextureMLApp {
         // setup events
         this.buttonLoadCoreLogs.onclick = this.buttonLoadCoreLogsOnClick.bind(this);
         this.buttonLoadCoreImages.onclick = this.buttonLoadCoreImagesOnClick.bind(this);
+        this.buttonSubmitTextures.onclick = this.buttonSubmitTexturesOnClick.bind(this);
         this.buttonCore.onclick = this.buttonCoreOnClick.bind(this);
         this.buttonCrop.onclick = this.buttonCropOnClick.bind(this);
         this.buttonRepr.onclick = this.buttonReprOnClick.bind(this);
@@ -83,26 +86,33 @@ export class TextureMLApp {
 
         // data structures
         this.sessionInfo = new SessionInfo();
+        this.sessionInfo.onloadFromServer = this.update.bind(this);
         this.sessionInfo.sessionID = Math.random().toString(36).slice(2);
         this.sessionInfo.sessionData.coreImageList.onloadImageFile = imageInfo => console.log(imageInfo);
         this.sessionInfo.sessionData.generationInfos.push(new GenerationInfo());
-        this.sessionInfo.sessionData.generationInfos[0].textureIDList.push(new TextureID());
-        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].name = "Texture_01";
-        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].color = "#ff000";
-        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].infImageNames.push("1");
-        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].infImageNames.push("2");
-        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].infImageNames.push("3");
-        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].manImageNames.push("1");
-        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].manImageNames.push("2");
-        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].manImageNames.push("3");
-        console.log(this.sessionInfo.saveToJsonString());
+        this.sessionInfo.sessionData.generationInfos[0].textureIDList = [
+            new TextureID("Texture_A", "#0000FF"), new TextureID("Texture_B", "#FF0000"), new TextureID("Texture_C", "#00FF00"), new TextureID("Texture_D", "#FF8800"),
+            new TextureID("Texture_E", "#B0187B"), new TextureID("Texture_F", "#8B7DA3"), new TextureID("Texture_G", "#A545BB"), new TextureID("Texture_H", "#C7A248"),
+            new TextureID("Texture_I", "#39F992"), new TextureID("Texture_J", "#324CF7"), new TextureID("Texture_K", "#D04D5E"), new TextureID("Texture_L", "#1E88E6"),
+            new TextureID("Texture_M", "#92BFB3"), new TextureID("Texture_N", "#858D1A"), new TextureID("Texture_O", "#92E877"), new TextureID("Texture_P", "#1FDFD9"),
+            new TextureID("Texture_Q", "#DD7488"), new TextureID("Texture_R", "#9DACBB"), new TextureID("Texture_S", "#934591"), new TextureID("Texture_T", "#FC9AA4"),
+        ];
 
         // components
+        this.inputSessionID.value =this.sessionInfo.sessionID;
         this.overlayLog = new OverlayLog(this.divOverlay);
         this.imageInfoListCoreViewer = new ImageInfoListViewer(this.divCorePreview, this.sessionInfo.sessionData.coreImageList);
         this.imageInfoListCropViewer = new ImageInfoListViewer(this.divCropPreview, this.sessionInfo.sessionData.cropImageList);
         this.imageInfoListReprViewer = new ImageInfoListViewer(this.divReprPreview, this.sessionInfo.sessionData.cropImageList);
         this.imageInfoListReprViewer.setIncludeList(this.sessionInfo.sessionData.reprImageNames);
+    }
+
+    // update
+    private update(sessionInfo: SessionInfo) {
+        this.imageInfoListCoreViewer.update();
+        this.imageInfoListCropViewer.update();
+        this.imageInfoListReprViewer.setIncludeList(sessionInfo.sessionData.reprImageNames);
+        this.imageInfoListReprViewer.update();
     }
 
     // buttonLoadCoreLogsOnClick
@@ -134,12 +144,22 @@ export class TextureMLApp {
             this.sessionInfo.sessionData.coreImageList.loadFromFiles(files).then(images => {
                 this.overlayLog.addMessage("Send... Waiting...");
                 this.sessionInfo.send().then(sessionInfo => {
-                    this.imageInfoListCoreViewer.update();
+                    this.update(this.sessionInfo);
                     this.overlayLog.hide();
                 });
             });
         }
         this.inputLoadCoreImages.click();
+    }
+
+    // buttonSubmitTexturesOnClick
+    private buttonSubmitTexturesOnClick(event: MouseEvent) {
+        this.overlayLog.show();
+        this.overlayLog.addMessage("Send...");
+        this.sessionInfo.send().then(sessionInfo => {
+            this.update(this.sessionInfo);
+            this.overlayLog.hide();
+        });
     }
 
     // buttonCoreOnClick
