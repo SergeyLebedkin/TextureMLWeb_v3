@@ -1,6 +1,6 @@
 import { CoreLogs } from "./CoreLogs";
 import { ImageInfoList } from "./ImageInfoList";
-import { Inference } from "./Inference";
+import { GenerationInfo } from "./GenerationInfo"
 
 // SessionData
 export class SessionData {
@@ -9,5 +9,5 @@ export class SessionData {
     public coreImageList: ImageInfoList = new ImageInfoList();
     public cropImageList: ImageInfoList = new ImageInfoList();
     public reprImageNames: Array<string> = [];
-    public inferenceList: Array<Inference> = new Array<Inference>();
+    public generationInfos: Array<GenerationInfo> = [];
 }

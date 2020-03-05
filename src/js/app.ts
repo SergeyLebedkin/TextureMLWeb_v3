@@ -4,6 +4,8 @@ import { OverlayLog } from "./TextureML/Components/OverlayLog";
 import { ImageInfoListViewer } from "./TextureML/Components/ImageInfoListViewer";
 import { ColorMapType } from "./TextureML/Types/ColorMapType";
 import { SessionInfo } from "./TextureML/Types/SessionInfo";
+import { GenerationInfo } from "./TextureML/Types/GenerationInfo";
+import { TextureID } from "./TextureML/Types/TextureID";
 
 // TextureMLApp
 export class TextureMLApp {
@@ -81,7 +83,19 @@ export class TextureMLApp {
 
         // data structures
         this.sessionInfo = new SessionInfo();
+        this.sessionInfo.sessionID = Math.random().toString(36).slice(2);
         this.sessionInfo.sessionData.coreImageList.onloadImageFile = imageInfo => console.log(imageInfo);
+        this.sessionInfo.sessionData.generationInfos.push(new GenerationInfo());
+        this.sessionInfo.sessionData.generationInfos[0].textureIDList.push(new TextureID());
+        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].name = "Texture_01";
+        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].color = "#ff000";
+        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].infImageNames.push("1");
+        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].infImageNames.push("2");
+        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].infImageNames.push("3");
+        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].manImageNames.push("1");
+        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].manImageNames.push("2");
+        this.sessionInfo.sessionData.generationInfos[0].textureIDList[0].manImageNames.push("3");
+        console.log(this.sessionInfo.saveToJsonString());
 
         // components
         this.overlayLog = new OverlayLog(this.divOverlay);
