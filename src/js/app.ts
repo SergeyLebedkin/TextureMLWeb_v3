@@ -99,7 +99,7 @@ export class TextureMLApp {
         ];
 
         // components
-        this.inputSessionID.value =this.sessionInfo.sessionID;
+        this.inputSessionID.value = this.sessionInfo.sessionID;
         this.overlayLog = new OverlayLog(this.divOverlay);
         this.imageInfoListCoreViewer = new ImageInfoListViewer(this.divCorePreview, this.sessionInfo.sessionData.coreImageList);
         this.imageInfoListCropViewer = new ImageInfoListViewer(this.divCropPreview, this.sessionInfo.sessionData.cropImageList);
@@ -108,10 +108,10 @@ export class TextureMLApp {
     }
 
     // update
-    private update(sessionInfo: SessionInfo) {
+    private update() {
+        this.imageInfoListReprViewer.setIncludeList(this.sessionInfo.sessionData.reprImageNames);
         this.imageInfoListCoreViewer.update();
         this.imageInfoListCropViewer.update();
-        this.imageInfoListReprViewer.setIncludeList(sessionInfo.sessionData.reprImageNames);
         this.imageInfoListReprViewer.update();
     }
 
@@ -144,7 +144,7 @@ export class TextureMLApp {
             this.sessionInfo.sessionData.coreImageList.loadFromFiles(files).then(images => {
                 this.overlayLog.addMessage("Send... Waiting...");
                 this.sessionInfo.send().then(sessionInfo => {
-                    this.update(this.sessionInfo);
+                    this.update();
                     this.overlayLog.hide();
                 });
             });
@@ -155,10 +155,12 @@ export class TextureMLApp {
     // buttonSubmitTexturesOnClick
     private buttonSubmitTexturesOnClick(event: MouseEvent) {
         this.overlayLog.show();
-        this.overlayLog.addMessage("Send...");
-        this.sessionInfo.send().then(sessionInfo => {
-            this.update(this.sessionInfo);
-            this.overlayLog.hide();
+        new Promise(() => {
+            this.overlayLog.addMessage("Send...");
+            this.sessionInfo.send().then(sessionInfo => {
+                this.update();
+                this.overlayLog.hide();
+            })
         });
     }
 
